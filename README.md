@@ -9,11 +9,12 @@ Uploaded files are stored under `catalog/` and `images/` and referenced from the
 database.
 
 ## Features
-- Basic pages: Home (search), Login, and Admin
-- Product search form that queries the local SQLite database and supports filters for model, specification and tolerance
-- Simple login (username/password: `admin`/`admin`) stored in browser session
-- Admin page allows adding, updating, or removing products from the database
-- Admin page shows a table of all stored items for quick management
+- Basic pages: Home (search), Login/Sign‑up and Admin
+- Product search with filters for model, specification and tolerance
+- Registered users can view their recent search history
+- Guest searches are kept only for the current session
+- Admin page allows adding, updating or removing products
+- Default admin credentials are `admin`/`admin`
 
 ## Setup
 1. Install dependencies with `npm install`

@@ -36,6 +36,56 @@ const upload = multer({ storage });
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// ----- User authentication -----
+app.post('/api/register', (req, res) => {
+  const { username, password, phone, fullname, company, position } = req.body;
+  if (!username || !password) return res.status(400).json({ error: 'missing data' });
+  const stmt = db.prepare(
+    'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
+  );
+  stmt.run(username, password, phone, fullname, company, position, function (err) {
+    if (err) return res.status(400).json({ error: 'user exists' });
+    res.json({ id: this.lastID });
+  });
+});
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  db.get(
+    'SELECT * FROM users WHERE username=? AND password=?',
+    [username, password],
+    (err, row) => {
+      if (err || !row) return res.status(401).json({ error: 'invalid' });
+      res.json({ ok: true });
+    }
+  );
+});
+
+app.post('/api/history', (req, res) => {
+  const { username, query } = req.body;
+  if (!username || !query) return res.status(400).json({ error: 'missing' });
+  db.run(
+    'INSERT INTO search_history (username, query) VALUES (?, ?)',
+    [username, JSON.stringify(query)],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID });
+    }
+  );
+});
+
+app.get('/api/history', (req, res) => {
+  const username = req.query.username;
+  db.all(
+    'SELECT query, ts FROM search_history WHERE username=? ORDER BY ts DESC LIMIT 10',
+    [username],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows.map(r => ({ query: JSON.parse(r.query), ts: r.ts })));
+    }
+  );
+});
+
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS chains (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,6 +95,21 @@ db.serialize(() => {
     tolerance TEXT,
     catalog TEXT,
     image TEXT
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    phone TEXT,
+    fullname TEXT,
+    company TEXT,
+    position TEXT
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS search_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    query TEXT,
+    ts DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
   // Insert a couple of sample rows the first time the DB is created so the UI
   // has something to display. These can be removed through the admin page.
@@ -80,6 +145,16 @@ db.serialize(() => {
         ''
       );
       stmt.finalize();
+    }
+  });
+
+  db.get('SELECT COUNT(*) AS cnt FROM users', (err, row) => {
+    if (!err && row && row.cnt === 0) {
+      const u = db.prepare(
+        'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
+      );
+      u.run('admin', 'admin', '', 'Administrator', '', '');
+      u.finalize();
     }
   });
 });
