@@ -17,6 +17,7 @@ database.
 - Admin page allows adding, updating or removing products
 - Default admin credentials are `admin`/`admin`
 - Each result links to a dedicated detail page
+- Dedicated History page shows your recent searches
 - Pages include a logout link to clear the session
 
 ## Setup
@@ -36,7 +37,7 @@ entries.
 The included HTML pages and dummy rows are sufficient for a short demo or
 presentation. Start the server and open the Home page to search the preloaded
 entries. Log in as `admin`/`admin` to try the admin interface and modify the
-sample data.
+sample data. Use the **History** link to review your recent search queries.
 
 ### Adding catalog PDFs
 1. Place any existing catalog PDFs in the `catalog/` directory or upload them

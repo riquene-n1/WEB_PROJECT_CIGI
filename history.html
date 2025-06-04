@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search History</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Search History</h1>
+        <nav>
+            <a href="index.html">Home</a> |
+            <a href="admin.html">Admin</a> |
+            <a href="history.html">History</a> |
+            <a href="login.html">Login</a> |
+            <a href="#" id="logoutLink">Logout</a>
+        </nav>
+    </header>
+    <section>
+        <h2>Recent Searches</h2>
+        <ul id="historyList"></ul>
+    </section>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadHistory);
+    </script>
+</body>
+</html>
