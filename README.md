@@ -20,8 +20,16 @@ database.
 2. Start the server with `npm start`
 3. Open `http://localhost:3000/index.html` in a browser
 
-The server inserts two sample rows on first start so you can test the UI right
-away. Visit the Admin page to view, edit or remove these entries.
+The server inserts several sample rows on first start so you can immediately
+experiment with the interface. The dummy rows reference placeholder PDFs stored
+in the `catalog/` folder. Visit the Admin page to view, edit or remove these
+entries.
+
+### Demo Use
+The included HTML pages and dummy rows are sufficient for a short demo or
+presentation. Start the server and open the Home page to search the preloaded
+entries. Log in as `admin`/`admin` to try the admin interface and modify the
+sample data.
 
 ### Adding catalog PDFs
 1. Place any existing catalog PDFs in the `catalog/` directory or upload them

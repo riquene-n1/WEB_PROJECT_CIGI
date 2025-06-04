@@ -53,8 +53,32 @@ db.serialize(() => {
       const stmt = db.prepare(
         'INSERT INTO chains (modelNo, type, spec, tolerance, catalog, image) VALUES (?, ?, ?, ?, ?, ?)'
       );
-      stmt.run('RF2040', 'Roller Chain', '1/2 pitch', '+0/-0.1', '', '');
-      stmt.run('BS25', 'Conveyor Chain', '1 pitch', '+0/-0.2', '', '');
+      stmt.run('RF2040', 'Roller Chain', '1/2 pitch', '+0/-0.1', 'catalog/sample.pdf', '');
+      stmt.run('BS25', 'Conveyor Chain', '1 pitch', '+0/-0.2', 'catalog/sample.pdf', '');
+      stmt.run(
+        'RS08B-1',
+        'Roller Chain',
+        '5/8" pitch',
+        '+0/-0.15',
+        'catalog/drivechain2020-web.pdf',
+        ''
+      );
+      stmt.run(
+        'SC08B',
+        'Small Conveyor Chain',
+        '1 pitch',
+        '+0/-0.3',
+        'catalog/smallconveyorchain2024-web.pdf',
+        ''
+      );
+      stmt.run(
+        'RS10B-1',
+        'Roller Chain',
+        '5/8" pitch',
+        '+0/-0.2',
+        'catalog/3_gs_file2_0_1958484775.pdf',
+        ''
+      );
       stmt.finalize();
     }
   });
