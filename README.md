@@ -11,6 +11,7 @@ database.
 ## Features
 - Basic pages: Home (search), Login/Sign‑up and Admin
 - Product search with filters for model, specification and tolerance
+- Server API `/api/chains` supports query parameters for filtered search
 - Registered users can view their recent search history
 - Guest searches are kept only for the current session
 - Admin page allows adding, updating or removing products

@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
     const resultBody = document.querySelector('#resultTable tbody');
 
-    async function fetchChains() {
-        const res = await fetch('/api/chains');
+    async function fetchChains(query) {
+        const params = new URLSearchParams(query || {}).toString();
+        const res = await fetch('/api/chains' + (params ? `?${params}` : ''));
         return res.json();
     }
 
@@ -63,18 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 spec: specVal,
                 tol: tolVal
             };
-            const chains = await fetchChains();
-            chains
-                .filter(item => {
-                    const matchType = typeVal ? item.type.toLowerCase().includes(typeVal) : true;
-                    const matchModel = modelVal ? item.modelNo.toLowerCase().includes(modelVal) : true;
-                    const matchSpec = specVal ? item.spec.toLowerCase().includes(specVal) : true;
-                    const matchTol = tolVal ? item.tolerance.toLowerCase().includes(tolVal) : true;
-                    return matchType && matchModel && matchSpec && matchTol;
-                })
-                .forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
+            const chains = await fetchChains(queryObj);
+            chains.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
                         <td>${item.modelNo}</td>
                         <td>${item.type}</td>
                         <td>${item.spec}</td>
@@ -82,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td><a href="${item.catalog}">View</a></td>
                         <td><img src="${item.image}" alt="${item.modelNo}" width="50"></td>
                     `;
-                    resultBody.appendChild(row);
-                });
+                resultBody.appendChild(row);
+            });
 
             const username = sessionStorage.getItem('loggedIn') === 'true' ? sessionStorage.getItem('username') : null;
             if (username) {

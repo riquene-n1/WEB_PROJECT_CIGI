@@ -160,7 +160,26 @@ db.serialize(() => {
 });
 
 app.get('/api/chains', (req, res) => {
-  db.all('SELECT * FROM chains', [], (err, rows) => {
+  const { type, model, spec, tol } = req.query;
+  let sql = 'SELECT * FROM chains WHERE 1=1';
+  const params = [];
+  if (type) {
+    sql += ' AND LOWER(type) LIKE ?';
+    params.push('%' + type.toLowerCase() + '%');
+  }
+  if (model) {
+    sql += ' AND LOWER(modelNo) LIKE ?';
+    params.push('%' + model.toLowerCase() + '%');
+  }
+  if (spec) {
+    sql += ' AND LOWER(spec) LIKE ?';
+    params.push('%' + spec.toLowerCase() + '%');
+  }
+  if (tol) {
+    sql += ' AND LOWER(tolerance) LIKE ?';
+    params.push('%' + tol.toLowerCase() + '%');
+  }
+  db.all(sql, params, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
