@@ -1,35 +1,44 @@
-# WEB_PROJECT_CIGI
 # Tsubakimoto Chain Search UI
 
 Prototype web interface for managing Tsubakimoto chain catalog data. The
 application includes a small Node.js backend using SQLite so data can be stored
-locally. The database currently contains only a couple of dummy records so the
-UI has something to display. Real catalog data will be imported later from an
-Oracle database after crawling the official Tsubakimoto site.
+locally. Administrators can upload catalog PDFs and images directly through the
+web interface. Uploaded PDFs are parsed server-side so that model number,
+specification and tolerance fields are filled automatically when possible.
+Uploaded files are stored under `catalog/` and `images/` and referenced from the
+database.
 
 ## Features
-- Basic pages: Home (search), Login, and Admin
-- Product search form that queries the local SQLite database
-- Simple login (username/password: `admin`/`admin`) stored in browser session
-- Admin page allows adding or removing products from the database
+- Basic pages: Home (search), Login/Sign‑up and Admin
+- Product search with filters for model, specification and tolerance
+- Registered users can view their recent search history
+- Guest searches are kept only for the current session
+- Admin page allows adding, updating or removing products
+- Default admin credentials are `admin`/`admin`
 
 ## Setup
 1. Install dependencies with `npm install`
 2. Start the server with `npm start`
 3. Open `http://localhost:3000/index.html` in a browser
 
-### Crawling catalog PDFs
-1. Download desired catalog PDFs from the Tsubakimoto website and place them
-   in the `catalog/` directory of this project.
-2. Install extra dependencies: `npm install pdf-parse` (may require internet
-   access).
-3. Run `node crawler.js` to parse the PDFs and insert placeholder rows into the
-   SQLite database. Adjust the parsing logic to extract real specifications as
-   needed.
+The server inserts several sample rows on first start so you can immediately
+experiment with the interface. The dummy rows reference placeholder PDFs stored
+in the `catalog/` folder. Visit the Admin page to view, edit or remove these
+entries.
+
+### Demo Use
+The included HTML pages and dummy rows are sufficient for a short demo or
+presentation. Start the server and open the Home page to search the preloaded
+entries. Log in as `admin`/`admin` to try the admin interface and modify the
+sample data.
+
+### Adding catalog PDFs
+1. Place any existing catalog PDFs in the `catalog/` directory or upload them
+   via the Admin page when creating a product entry. Uploaded files are scanned
+   and the extracted details are used to populate new database rows.
+2. Optional: run `node crawler.js` to parse PDFs in bulk and insert entries into
+   the SQLite database.
 
 ## Next Steps
-- Migrate the dataset to Oracle once the schema is finalized
-- Expand the admin features for editing existing entries
-- Implement a crawler to collect catalog specifications from
-  `https://tsubakimoto-tck.co.kr/goods_main.php` and populate the Oracle
-  database with the retrieved information
+- Tune PDF parsing logic for better accuracy and support more catalog formats
+- Add validations and UI polish

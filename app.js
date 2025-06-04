@@ -9,6 +9,44 @@ document.addEventListener('DOMContentLoaded', () => {
         return res.json();
     }
 
+    async function loadHistory() {
+        const list = document.getElementById('historyList');
+        if (!list) return;
+        list.innerHTML = '';
+        const username = sessionStorage.getItem('loggedIn') === 'true' ? sessionStorage.getItem('username') : null;
+        let items = [];
+        if (username) {
+            const res = await fetch(`/api/history?username=${encodeURIComponent(username)}`);
+            if (res.ok) items = await res.json();
+        } else {
+            items = JSON.parse(sessionStorage.getItem('tmpHistory') || '[]');
+        }
+        items.forEach(it => {
+            const li = document.createElement('li');
+            const q = it.query || it.query;
+            li.textContent = `${q.type || ''} ${q.model || ''} ${q.spec || ''} ${q.tol || ''}`.trim();
+            list.appendChild(li);
+        });
+    }
+
+    async function populateAdminTable() {
+        const tableBody = document.querySelector('#adminTable tbody');
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+        const chains = await fetchChains();
+        chains.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.id}</td>
+                <td>${item.modelNo}</td>
+                <td>${item.type}</td>
+                <td>${item.spec}</td>
+                <td>${item.tolerance}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
     if (productForm && resultBody) {
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -19,6 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const specVal = document.getElementById('spec').value.trim().toLowerCase();
             const tolVal = document.getElementById('tolerance').value.trim().toLowerCase();
 
+            const queryObj = {
+                type: typeVal,
+                model: modelVal,
+                spec: specVal,
+                tol: tolVal
+            };
             const chains = await fetchChains();
             chains
                 .filter(item => {
@@ -40,20 +84,67 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     resultBody.appendChild(row);
                 });
+
+            const username = sessionStorage.getItem('loggedIn') === 'true' ? sessionStorage.getItem('username') : null;
+            if (username) {
+                fetch('/api/history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, query: queryObj })
+                }).then(loadHistory);
+            } else {
+                const tmp = JSON.parse(sessionStorage.getItem('tmpHistory') || '[]');
+                tmp.unshift({ query: queryObj, ts: new Date().toISOString() });
+                sessionStorage.setItem('tmpHistory', JSON.stringify(tmp.slice(0,5)));
+                loadHistory();
+            }
         });
     }
 
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            if (user === 'admin' && pass === 'admin') {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            if (res.ok) {
                 sessionStorage.setItem('loggedIn', 'true');
-                window.location.href = 'admin.html';
+                sessionStorage.setItem('username', user);
+                if (user === 'admin') window.location.href = 'admin.html';
+                else window.location.href = 'index.html';
             } else {
                 alert('Invalid credentials');
+            }
+        });
+    }
+
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                username: document.getElementById('suUsername').value,
+                password: document.getElementById('suPassword').value,
+                phone: document.getElementById('suPhone').value,
+                fullname: document.getElementById('suName').value,
+                company: document.getElementById('suCompany').value,
+                position: document.getElementById('suPos').value
+            };
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            if (res.ok) {
+                alert('Registered successfully');
+                window.location.href = 'login.html';
+            } else {
+                alert('Registration failed');
             }
         });
     }
@@ -62,22 +153,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addForm) {
         addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const payload = {
-                modelNo: document.getElementById('newModelNo').value,
-                type: document.getElementById('newType').value,
-                spec: document.getElementById('newSpec').value,
-                tolerance: document.getElementById('newTol').value,
-                catalog: '#',
-                image: ''
-            };
+            const formData = new FormData(addForm);
             const res = await fetch('/api/chains', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: formData
             });
             if (res.ok) {
                 alert('Item added');
                 addForm.reset();
+                populateAdminTable();
             } else {
                 alert('Add failed');
             }
@@ -93,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 alert('Item removed');
                 removeForm.reset();
+                populateAdminTable();
             } else {
                 alert('Remove failed');
             }
@@ -104,25 +189,26 @@ document.addEventListener('DOMContentLoaded', () => {
         updateForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('updateId').value;
-            const payload = {
-                modelNo: document.getElementById('updateModel').value,
-                type: document.getElementById('updateType').value,
-                spec: document.getElementById('updateSpec').value,
-                tolerance: document.getElementById('updateTol').value,
-                catalog: '#',
-                image: ''
-            };
+            const formData = new FormData(updateForm);
             const res = await fetch(`/api/chains/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: formData
             });
             if (res.ok) {
                 alert('Item updated');
                 updateForm.reset();
+                populateAdminTable();
             } else {
                 alert('Update failed');
             }
         });
     }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', populateAdminTable);
+    }
+
+    populateAdminTable();
+    loadHistory();
 });
