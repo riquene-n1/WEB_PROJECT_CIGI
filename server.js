@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const parseCatalogPdf = require('./parsePdf');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,35 +57,74 @@ app.get('/api/chains', (req, res) => {
   });
 });
 
-app.post('/api/chains', upload.fields([{ name: 'catalog' }, { name: 'image' }]), (req, res) => {
-  const { modelNo, type, spec, tolerance } = req.body;
-  const catalogFile = req.files.catalog ? path.join('catalog', req.files.catalog[0].filename) : '';
-  const imageFile = req.files.image ? path.join('images', req.files.image[0].filename) : '';
-  const stmt = db.prepare(
-    'INSERT INTO chains (modelNo, type, spec, tolerance, catalog, image) VALUES (?, ?, ?, ?, ?, ?)'
-  );
-  stmt.run(modelNo, type, spec, tolerance, catalogFile, imageFile, function (err) {
-    if (err) return res.status(400).json({ error: err.message });
-    res.json({ id: this.lastID });
-  });
-});
+app.post(
+  '/api/chains',
+  upload.fields([{ name: 'catalog' }, { name: 'image' }]),
+  async (req, res) => {
+    try {
+      let { modelNo, type, spec, tolerance } = req.body;
+      const catalogFile = req.files.catalog
+        ? path.join('catalog', req.files.catalog[0].filename)
+        : '';
+      const imageFile = req.files.image
+        ? path.join('images', req.files.image[0].filename)
+        : '';
+
+      if (req.files.catalog) {
+        const parsed = await parseCatalogPdf(
+          path.join(__dirname, catalogFile)
+        );
+        modelNo = modelNo || parsed.modelNo;
+        type = type || parsed.type;
+        spec = spec || parsed.spec;
+        tolerance = tolerance || parsed.tolerance;
+      }
+
+      const stmt = db.prepare(
+        'INSERT INTO chains (modelNo, type, spec, tolerance, catalog, image) VALUES (?, ?, ?, ?, ?, ?)'
+      );
+      stmt.run(
+        modelNo,
+        type,
+        spec,
+        tolerance,
+        catalogFile,
+        imageFile,
+        function (err) {
+          if (err) return res.status(400).json({ error: err.message });
+          res.json({ id: this.lastID });
+        }
+      );
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  }
+);
 
 app.put(
   '/api/chains/:id',
   upload.fields([{ name: 'catalog' }, { name: 'image' }]),
-  (req, res) => {
+  async (req, res) => {
     const { id } = req.params;
-    const { modelNo, type, spec, tolerance } = req.body;
+    let { modelNo, type, spec, tolerance } = req.body;
 
-    db.get('SELECT catalog, image FROM chains WHERE id=?', [id], (err, row) => {
+    db.get('SELECT catalog, image FROM chains WHERE id=?', [id], async (err, row) => {
       if (err || !row) return res.status(404).json({ error: 'Not found' });
 
-      const catalogFile = req.files.catalog
-        ? path.join('catalog', req.files.catalog[0].filename)
-        : row.catalog;
-      const imageFile = req.files.image
-        ? path.join('images', req.files.image[0].filename)
-        : row.image;
+      let catalogFile = row.catalog;
+      let imageFile = row.image;
+
+      if (req.files.catalog) {
+        catalogFile = path.join('catalog', req.files.catalog[0].filename);
+        const parsed = await parseCatalogPdf(path.join(__dirname, catalogFile));
+        modelNo = modelNo || parsed.modelNo;
+        type = type || parsed.type;
+        spec = spec || parsed.spec;
+        tolerance = tolerance || parsed.tolerance;
+      }
+      if (req.files.image) {
+        imageFile = path.join('images', req.files.image[0].filename);
+      }
 
       db.run(
         'UPDATE chains SET modelNo=?, type=?, spec=?, tolerance=?, catalog=?, image=? WHERE id=?',

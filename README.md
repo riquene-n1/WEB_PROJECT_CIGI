@@ -3,8 +3,10 @@
 Prototype web interface for managing Tsubakimoto chain catalog data. The
 application includes a small Node.js backend using SQLite so data can be stored
 locally. Administrators can upload catalog PDFs and images directly through the
-web interface. These files are saved under `catalog/` and `images/` and the
-database records reference them.
+web interface. Uploaded PDFs are parsed server-side so that model number,
+specification and tolerance fields are filled automatically when possible. These
+files are saved under `catalog/` and `images/` and the database records
+reference them.
 
 ## Features
 - Basic pages: Home (search), Login, and Admin
@@ -19,10 +21,11 @@ database records reference them.
 
 ### Adding catalog PDFs
 1. Place any existing catalog PDFs in the `catalog/` directory or upload them
-   via the Admin page when creating a product entry.
+   via the Admin page when creating a product entry. Uploaded files are scanned
+   and the extracted details are used to populate new database rows.
 2. Optional: run `node crawler.js` to parse PDFs in bulk and insert entries into
    the SQLite database.
 
 ## Next Steps
-- Improve PDF parsing logic in `crawler.js` for automatic data extraction
-- Add more validations and UI polish
+- Tune PDF parsing logic for better accuracy and support more catalog formats
+- Add validations and UI polish
