@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Admin Panel</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="login.html">Login</a>
+        </nav>
+    </header>
+    <section>
+        <h2>Add New Chain</h2>
+        <form id="addForm">
+            <label for="newModelNo">Model No:</label>
+            <input type="text" id="newModelNo" name="newModelNo" required>
+            <label for="newType">Type:</label>
+            <input type="text" id="newType" name="newType" required>
+            <label for="newSpec">Specification:</label>
+            <input type="text" id="newSpec" name="newSpec" required>
+            <label for="newTol">Tolerance:</label>
+            <input type="text" id="newTol" name="newTol" required>
+            <button type="submit">Add</button>
+        </form>
+    </section>
+    <section>
+        <h2>Remove Chain</h2>
+        <form id="removeForm">
+            <label for="removeId">ID:</label>
+            <input type="text" id="removeId" name="removeId" required>
+            <button type="submit">Remove</button>
+        </form>
+    </section>
+    <section>
+        <h2>Update Chain</h2>
+        <form id="updateForm">
+            <label for="updateId">ID:</label>
+            <input type="text" id="updateId" name="updateId" required>
+            <label for="updateModel">Model No:</label>
+            <input type="text" id="updateModel" name="updateModel" required>
+            <label for="updateType">Type:</label>
+            <input type="text" id="updateType" name="updateType" required>
+            <label for="updateSpec">Specification:</label>
+            <input type="text" id="updateSpec" name="updateSpec" required>
+            <label for="updateTol">Tolerance:</label>
+            <input type="text" id="updateTol" name="updateTol" required>
+            <button type="submit">Update</button>
+        </form>
+    </section>
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            alert('Please log in first');
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tsubakimoto Product Search</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Tsubakimoto Chain Search</h1>
+        <nav>
+            <a href="index.html">Home</a> |
+            <a href="admin.html">Admin</a> |
+            <a href="login.html">Login</a>
+        </nav>
+    </header>
+    <section id="search-form">
+        <h2>Search Products</h2>
+        <form id="productForm">
+            <label for="productType">Product Type:</label>
+            <select id="productType" name="productType">
+                <option value="roller">Roller Chain</option>
+                <option value="conveyor">Conveyor Chain</option>
+            </select>
+            <label for="tolerance">Tolerance:</label>
+            <input type="text" id="tolerance" name="tolerance" placeholder="e.g., +0/-0.1">
+            <label for="modelNo">Model No:</label>
+            <input type="text" id="modelNo" name="modelNo" placeholder="e.g., RF2040">
+            <label for="spec">Specification:</label>
+            <input type="text" id="spec" name="spec" placeholder="e.g., 1/2 pitch">
+            <button type="submit">Search</button>
+        </form>
+    </section>
+    <section id="results">
+        <h2>Results</h2>
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Model No</th>
+                    <th>Type</th>
+                    <th>Specification</th>
+                    <th>Tolerance</th>
+                    <th>Catalog</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </section>
+    <script src="app.js"></script>
+</body>
+</html>

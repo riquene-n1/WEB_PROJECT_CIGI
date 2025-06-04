@@ -1,0 +1,14 @@
+{
+  "name": "tsubaki-ui",
+  "version": "0.1.0",
+  "description": "Tsubakimoto product management prototype",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.6",
+    "pdf-parse": "^1.1.1"
+  }
+}
