@@ -1,12 +1,36 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, 'tsubaki.db');
 
 const db = new sqlite3.Database(DB_PATH);
+
+const CATALOG_DIR = path.join(__dirname, 'catalog');
+const IMAGE_DIR = path.join(__dirname, 'images');
+for (const dir of [CATALOG_DIR, IMAGE_DIR]) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === 'catalog') cb(null, CATALOG_DIR);
+    else if (file.fieldname === 'image') cb(null, IMAGE_DIR);
+    else cb(null, __dirname);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const name = Date.now() + '-' + file.fieldname + ext;
+    cb(null, name);
+  }
+});
+const upload = multer({ storage });
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -21,19 +45,8 @@ db.serialize(() => {
     catalog TEXT,
     image TEXT
   )`);
-  db.get('SELECT COUNT(*) AS count FROM chains', (err, row) => {
-    if (!err && row.count === 0) {
-      const stmt = db.prepare(
-        'INSERT INTO chains (modelNo, type, spec, tolerance, catalog, image) VALUES (?, ?, ?, ?, ?, ?)'
-      );
-      // Insert a couple of placeholder rows so the interface has data to display
-      // Real catalog and image files will be provided after crawling the
-      // official Tsubakimoto site.
-      stmt.run('RF2040', 'roller', '1/2 pitch', '+0/-0.1', '#', '#');
-      stmt.run('CONV500', 'conveyor', 'Standard', '+0/-0.2', '#', '#');
-      stmt.finalize();
-    }
-  });
+  // Database initialized; records will be added through the admin interface
+  // using PDF and image uploads.
 });
 
 app.get('/api/chains', (req, res) => {
@@ -43,29 +56,47 @@ app.get('/api/chains', (req, res) => {
   });
 });
 
-app.post('/api/chains', (req, res) => {
-  const { modelNo, type, spec, tolerance, catalog, image } = req.body;
+app.post('/api/chains', upload.fields([{ name: 'catalog' }, { name: 'image' }]), (req, res) => {
+  const { modelNo, type, spec, tolerance } = req.body;
+  const catalogFile = req.files.catalog ? path.join('catalog', req.files.catalog[0].filename) : '';
+  const imageFile = req.files.image ? path.join('images', req.files.image[0].filename) : '';
   const stmt = db.prepare(
     'INSERT INTO chains (modelNo, type, spec, tolerance, catalog, image) VALUES (?, ?, ?, ?, ?, ?)'
   );
-  stmt.run(modelNo, type, spec, tolerance, catalog, image, function (err) {
+  stmt.run(modelNo, type, spec, tolerance, catalogFile, imageFile, function (err) {
     if (err) return res.status(400).json({ error: err.message });
     res.json({ id: this.lastID });
   });
 });
 
-app.put('/api/chains/:id', (req, res) => {
-  const { id } = req.params;
-  const { modelNo, type, spec, tolerance, catalog, image } = req.body;
-  db.run(
-    'UPDATE chains SET modelNo=?, type=?, spec=?, tolerance=?, catalog=?, image=? WHERE id=?',
-    [modelNo, type, spec, tolerance, catalog, image, id],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ updated: this.changes });
-    }
-  );
-});
+app.put(
+  '/api/chains/:id',
+  upload.fields([{ name: 'catalog' }, { name: 'image' }]),
+  (req, res) => {
+    const { id } = req.params;
+    const { modelNo, type, spec, tolerance } = req.body;
+
+    db.get('SELECT catalog, image FROM chains WHERE id=?', [id], (err, row) => {
+      if (err || !row) return res.status(404).json({ error: 'Not found' });
+
+      const catalogFile = req.files.catalog
+        ? path.join('catalog', req.files.catalog[0].filename)
+        : row.catalog;
+      const imageFile = req.files.image
+        ? path.join('images', req.files.image[0].filename)
+        : row.image;
+
+      db.run(
+        'UPDATE chains SET modelNo=?, type=?, spec=?, tolerance=?, catalog=?, image=? WHERE id=?',
+        [modelNo, type, spec, tolerance, catalogFile, imageFile, id],
+        function (err2) {
+          if (err2) return res.status(500).json({ error: err2.message });
+          res.json({ updated: this.changes });
+        }
+      );
+    });
+  }
+);
 
 app.delete('/api/chains/:id', (req, res) => {
   const { id } = req.params;

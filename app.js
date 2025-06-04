@@ -62,18 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addForm) {
         addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const payload = {
-                modelNo: document.getElementById('newModelNo').value,
-                type: document.getElementById('newType').value,
-                spec: document.getElementById('newSpec').value,
-                tolerance: document.getElementById('newTol').value,
-                catalog: '#',
-                image: ''
-            };
+            const formData = new FormData(addForm);
             const res = await fetch('/api/chains', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: formData
             });
             if (res.ok) {
                 alert('Item added');
@@ -104,18 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('updateId').value;
-            const payload = {
-                modelNo: document.getElementById('updateModel').value,
-                type: document.getElementById('updateType').value,
-                spec: document.getElementById('updateSpec').value,
-                tolerance: document.getElementById('updateTol').value,
-                catalog: '#',
-                image: ''
-            };
+            const formData = new FormData(updateForm);
             const res = await fetch(`/api/chains/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: formData
             });
             if (res.ok) {
                 alert('Item updated');
