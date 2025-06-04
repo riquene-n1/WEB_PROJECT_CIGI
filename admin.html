@@ -60,6 +60,22 @@
             <button type="submit">Update</button>
         </form>
     </section>
+    <section>
+        <h2>Existing Chains</h2>
+        <button id="refreshBtn" type="button">Refresh</button>
+        <table id="adminTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Model No</th>
+                    <th>Type</th>
+                    <th>Specification</th>
+                    <th>Tolerance</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </section>
     <script>
         if (sessionStorage.getItem('loggedIn') !== 'true') {
             alert('Please log in first');

@@ -9,6 +9,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return res.json();
     }
 
+    async function populateAdminTable() {
+        const tableBody = document.querySelector('#adminTable tbody');
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+        const chains = await fetchChains();
+        chains.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.id}</td>
+                <td>${item.modelNo}</td>
+                <td>${item.type}</td>
+                <td>${item.spec}</td>
+                <td>${item.tolerance}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
     if (productForm && resultBody) {
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -70,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 alert('Item added');
                 addForm.reset();
+                populateAdminTable();
             } else {
                 alert('Add failed');
             }
@@ -85,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 alert('Item removed');
                 removeForm.reset();
+                populateAdminTable();
             } else {
                 alert('Remove failed');
             }
@@ -104,9 +124,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 alert('Item updated');
                 updateForm.reset();
+                populateAdminTable();
             } else {
                 alert('Update failed');
             }
         });
     }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', populateAdminTable);
+    }
+
+    populateAdminTable();
 });

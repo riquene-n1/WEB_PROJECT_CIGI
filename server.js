@@ -46,8 +46,18 @@ db.serialize(() => {
     catalog TEXT,
     image TEXT
   )`);
-  // Database initialized; records will be added through the admin interface
-  // using PDF and image uploads.
+  // Insert a couple of sample rows the first time the DB is created so the UI
+  // has something to display. These can be removed through the admin page.
+  db.get('SELECT COUNT(*) AS cnt FROM chains', (err, row) => {
+    if (!err && row && row.cnt === 0) {
+      const stmt = db.prepare(
+        'INSERT INTO chains (modelNo, type, spec, tolerance, catalog, image) VALUES (?, ?, ?, ?, ?, ?)'
+      );
+      stmt.run('RF2040', 'Roller Chain', '1/2 pitch', '+0/-0.1', '', '');
+      stmt.run('BS25', 'Conveyor Chain', '1 pitch', '+0/-0.2', '', '');
+      stmt.finalize();
+    }
+  });
 });
 
 app.get('/api/chains', (req, res) => {

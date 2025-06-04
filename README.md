@@ -4,20 +4,24 @@ Prototype web interface for managing Tsubakimoto chain catalog data. The
 application includes a small Node.js backend using SQLite so data can be stored
 locally. Administrators can upload catalog PDFs and images directly through the
 web interface. Uploaded PDFs are parsed server-side so that model number,
-specification and tolerance fields are filled automatically when possible. These
-files are saved under `catalog/` and `images/` and the database records
-reference them.
+specification and tolerance fields are filled automatically when possible.
+Uploaded files are stored under `catalog/` and `images/` and referenced from the
+database.
 
 ## Features
 - Basic pages: Home (search), Login, and Admin
 - Product search form that queries the local SQLite database and supports filters for model, specification and tolerance
 - Simple login (username/password: `admin`/`admin`) stored in browser session
 - Admin page allows adding, updating, or removing products from the database
+- Admin page shows a table of all stored items for quick management
 
 ## Setup
 1. Install dependencies with `npm install`
 2. Start the server with `npm start`
 3. Open `http://localhost:3000/index.html` in a browser
+
+The server inserts two sample rows on first start so you can test the UI right
+away. Visit the Admin page to view, edit or remove these entries.
 
 ### Adding catalog PDFs
 1. Place any existing catalog PDFs in the `catalog/` directory or upload them
