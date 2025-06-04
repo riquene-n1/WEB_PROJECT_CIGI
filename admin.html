@@ -16,15 +16,19 @@
     </header>
     <section>
         <h2>Add New Chain</h2>
-        <form id="addForm">
+        <form id="addForm" enctype="multipart/form-data">
             <label for="newModelNo">Model No:</label>
-            <input type="text" id="newModelNo" name="newModelNo" required>
+            <input type="text" id="newModelNo" name="modelNo" required>
             <label for="newType">Type:</label>
-            <input type="text" id="newType" name="newType" required>
+            <input type="text" id="newType" name="type" required>
             <label for="newSpec">Specification:</label>
-            <input type="text" id="newSpec" name="newSpec" required>
+            <input type="text" id="newSpec" name="spec" required>
             <label for="newTol">Tolerance:</label>
-            <input type="text" id="newTol" name="newTol" required>
+            <input type="text" id="newTol" name="tolerance" required>
+            <label for="newCatalog">Catalog PDF:</label>
+            <input type="file" id="newCatalog" name="catalog" accept="application/pdf">
+            <label for="newImage">Image:</label>
+            <input type="file" id="newImage" name="image" accept="image/*">
             <button type="submit">Add</button>
         </form>
     </section>
@@ -38,19 +42,39 @@
     </section>
     <section>
         <h2>Update Chain</h2>
-        <form id="updateForm">
+        <form id="updateForm" enctype="multipart/form-data">
             <label for="updateId">ID:</label>
-            <input type="text" id="updateId" name="updateId" required>
+            <input type="text" id="updateId" name="id" required>
             <label for="updateModel">Model No:</label>
-            <input type="text" id="updateModel" name="updateModel" required>
+            <input type="text" id="updateModel" name="modelNo" required>
             <label for="updateType">Type:</label>
-            <input type="text" id="updateType" name="updateType" required>
+            <input type="text" id="updateType" name="type" required>
             <label for="updateSpec">Specification:</label>
-            <input type="text" id="updateSpec" name="updateSpec" required>
+            <input type="text" id="updateSpec" name="spec" required>
             <label for="updateTol">Tolerance:</label>
-            <input type="text" id="updateTol" name="updateTol" required>
+            <input type="text" id="updateTol" name="tolerance" required>
+            <label for="updateCatalog">Catalog PDF:</label>
+            <input type="file" id="updateCatalog" name="catalog" accept="application/pdf">
+            <label for="updateImage">Image:</label>
+            <input type="file" id="updateImage" name="image" accept="image/*">
             <button type="submit">Update</button>
         </form>
+    </section>
+    <section>
+        <h2>Existing Chains</h2>
+        <button id="refreshBtn" type="button">Refresh</button>
+        <table id="adminTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Model No</th>
+                    <th>Type</th>
+                    <th>Specification</th>
+                    <th>Tolerance</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </section>
     <script>
         if (sessionStorage.getItem('loggedIn') !== 'true') {
