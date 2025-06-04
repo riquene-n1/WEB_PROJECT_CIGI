@@ -42,6 +42,10 @@ sample data.
 2. Optional: run `node crawler.js` to parse PDFs in bulk and insert entries into
    the SQLite database.
 
+### Exporting data
+Run `npm run export` to generate an `export.csv` file with the current chain
+entries. This CSV can then be imported into Oracle or other systems.
+
 ## Next Steps
 - Tune PDF parsing logic for better accuracy and support more catalog formats
 - Add validations and UI polish

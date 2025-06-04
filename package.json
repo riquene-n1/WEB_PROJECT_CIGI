@@ -4,7 +4,8 @@
   "description": "Tsubakimoto product management prototype",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "export": "node exportCsv.js"
   },
   "dependencies": {
     "express": "^4.19.2",
