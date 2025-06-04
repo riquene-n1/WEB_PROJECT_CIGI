@@ -9,7 +9,7 @@ Uploaded files are stored under `catalog/` and `images/` and referenced from the
 database.
 
 ## Features
-- Basic pages: Home (search), Login/Sign‑up and Admin
+- Basic pages: Home (search), Login/Sign‑up and Admin with a modern layout
 - Product search with filters for model, specification and tolerance
 - Server API `/api/chains` supports query parameters for filtered search
 - Registered users can view their recent search history
@@ -18,6 +18,7 @@ database.
 - Default admin credentials are `admin`/`admin`
 - Each result links to a dedicated detail page
 - Dedicated History page shows your recent searches
+- Modern CSS styles with the Roboto font for a cleaner look
 - Pages include a logout link to clear the session
 
 ## Setup
