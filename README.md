@@ -22,7 +22,10 @@ database.
 ## Setup
 1. Install dependencies with `npm install`
 2. Start the server with `npm start`
-3. Open `http://localhost:3000/index.html` in a browser
+3. Open `http://localhost:3000/index.html` in a browser. Use the Login link to
+   visit `http://localhost:3000/login.html` and sign in with the default
+   `admin`/`admin` credentials. Pages must be served through the running
+   server; opening the HTML files directly will prevent login from working.
 
 The server inserts several sample rows on first start so you can immediately
 experiment with the interface. The dummy rows reference placeholder PDFs stored
