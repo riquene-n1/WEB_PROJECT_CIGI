@@ -16,6 +16,8 @@ database.
 - Guest searches are kept only for the current session
 - Admin page allows adding, updating or removing products
 - Default admin credentials are `admin`/`admin`
+- Each result links to a dedicated detail page
+- Pages include a logout link to clear the session
 
 ## Setup
 1. Install dependencies with `npm install`

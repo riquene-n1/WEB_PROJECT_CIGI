@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain Details</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Chain Details</h1>
+        <nav>
+            <a href="index.html">Home</a> |
+            <a href="admin.html">Admin</a> |
+            <a href="login.html">Login</a> |
+            <a href="#" id="logoutLink">Logout</a>
+        </nav>
+    </header>
+    <section>
+        <table id="detailTable">
+            <tbody>
+                <tr><th>Model No</th><td id="dModel"></td></tr>
+                <tr><th>Type</th><td id="dType"></td></tr>
+                <tr><th>Specification</th><td id="dSpec"></td></tr>
+                <tr><th>Tolerance</th><td id="dTol"></td></tr>
+                <tr><th>Catalog</th><td id="dCatalog"></td></tr>
+                <tr><th>Image</th><td id="dImage"></td></tr>
+            </tbody>
+        </table>
+    </section>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadDetails);
+    </script>
+</body>
+</html>

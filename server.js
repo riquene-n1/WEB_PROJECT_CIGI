@@ -185,6 +185,14 @@ app.get('/api/chains', (req, res) => {
   });
 });
 
+app.get('/api/chains/:id', (req, res) => {
+  const { id } = req.params;
+  db.get('SELECT * FROM chains WHERE id=?', [id], (err, row) => {
+    if (err || !row) return res.status(404).json({ error: 'Not found' });
+    res.json(row);
+  });
+});
+
 app.post(
   '/api/chains',
   upload.fields([{ name: 'catalog' }, { name: 'image' }]),

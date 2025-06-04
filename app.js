@@ -48,6 +48,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    async function loadDetails() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const table = document.getElementById('detailTable');
+        if (!id || !table) return;
+        const res = await fetch(`/api/chains/${id}`);
+        if (!res.ok) {
+            table.querySelector('tbody').innerHTML = '<tr><td colspan="2">Not found</td></tr>';
+            return;
+        }
+        const item = await res.json();
+        document.getElementById('dModel').textContent = item.modelNo;
+        document.getElementById('dType').textContent = item.type;
+        document.getElementById('dSpec').textContent = item.spec;
+        document.getElementById('dTol').textContent = item.tolerance;
+        document.getElementById('dCatalog').innerHTML = `<a href="${item.catalog}">View</a>`;
+        document.getElementById('dImage').innerHTML = item.image ? `<img src="${item.image}" width="100">` : '';
+    }
+
     if (productForm && resultBody) {
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -74,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${item.tolerance}</td>
                         <td><a href="${item.catalog}">View</a></td>
                         <td><img src="${item.image}" alt="${item.modelNo}" width="50"></td>
+                        <td><a href="detail.html?id=${item.id}">Details</a></td>
                     `;
                 resultBody.appendChild(row);
             });
@@ -142,6 +162,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const logoutLink = document.getElementById('logoutLink');
+    if (logoutLink) {
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            logoutLink.style.display = 'inline';
+        } else {
+            logoutLink.style.display = 'none';
+        }
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem('loggedIn');
+            sessionStorage.removeItem('username');
+            window.location.href = 'index.html';
+        });
+    }
+
     const addForm = document.getElementById('addForm');
     if (addForm) {
         addForm.addEventListener('submit', async (e) => {
@@ -204,4 +239,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     populateAdminTable();
     loadHistory();
+    loadDetails();
 });
