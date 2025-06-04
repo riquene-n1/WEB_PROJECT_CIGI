@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         items.forEach(it => {
             const li = document.createElement('li');
-            const q = it.query || it.query;
+            const q = it.query;
             li.textContent = `${q.type || ''} ${q.model || ''} ${q.spec || ''} ${q.tol || ''}`.trim();
             list.appendChild(li);
         });
@@ -91,9 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${item.type}</td>
                         <td>${item.spec}</td>
                         <td>${item.tolerance}</td>
-                        <td><a href="${item.catalog}">View</a></td>
-                        <td><img src="${item.image}" alt="${item.modelNo}" width="50"></td>
-                        <td><a href="detail.html?id=${item.id}">Details</a></td>
+                <td><a href="${item.catalog}">View</a></td>
+                <td>${item.image ? `<img src="${item.image}" alt="${item.modelNo}" width="50">` : ''}</td>
+                <td><a href="detail.html?id=${item.id}">Details</a></td>
                     `;
                 resultBody.appendChild(row);
             });
