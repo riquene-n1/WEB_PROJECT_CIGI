@@ -9,6 +9,7 @@ Uploaded files are stored under `catalog/` and `images/` and referenced from the
 database.
 
 ## Features
+- Crawler script builds a `chains.json` file so data can be loaded without a database
 - Basic pages: Home (search), Login/Sign‑up and Admin with a modern layout
 - Product search with drop-down filters for model, specification and tolerance
 - Server API `/api/chains` supports query parameters for filtered search
@@ -45,8 +46,7 @@ sample data. Use the **History** link to review your recent search queries.
 1. Place any existing catalog PDFs in the `catalog/` directory or upload them
    via the Admin page when creating a product entry. Uploaded files are scanned
    and the extracted details are used to populate new database rows.
-2. Optional: run `node crawler.js` to parse PDFs in bulk and insert entries into
-   the SQLite database.
+2. Run `node crawler.js` to download catalog PDFs and build `chains.json` containing the parsed fields.
 
 ### Exporting data
 Run `npm run export` to generate an `export.csv` file with the current chain
@@ -59,3 +59,4 @@ your current and new password to update your account.
 ## Next Steps
 - Tune PDF parsing logic for better accuracy and support more catalog formats
 - Add validations and UI polish
+- Extend `crawler.js` to capture additional fields like chain size and material.
