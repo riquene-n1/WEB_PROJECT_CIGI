@@ -3,6 +3,8 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
 const parseCatalogPdf = require('./parsePdf');
 
 const app = express();
@@ -34,57 +36,76 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
+app.use(
+  session({
+    secret: 'tsubaki-secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 app.use(express.static(__dirname));
 
 // ----- User authentication -----
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { username, password, phone, fullname, company, position } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'missing data' });
-  const stmt = db.prepare(
-    'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
-  );
-  stmt.run(username, password, phone, fullname, company, position, function (err) {
-    if (err) return res.status(400).json({ error: 'user exists' });
-    res.json({ id: this.lastID });
-  });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const stmt = db.prepare(
+      'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    stmt.run(username, hash, phone, fullname, company, position, function (err) {
+      if (err) return res.status(400).json({ error: 'user exists' });
+      res.json({ id: this.lastID });
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  db.get(
-    'SELECT * FROM users WHERE username=? AND password=?',
-    [username, password],
-    (err, row) => {
-      if (err || !row) return res.status(401).json({ error: 'invalid' });
-      res.json({ ok: true });
-    }
-  );
+  db.get('SELECT * FROM users WHERE username=?', [username], async (err, row) => {
+    if (err || !row) return res.status(401).json({ error: 'invalid' });
+    const match = await bcrypt.compare(password, row.password);
+    if (!match) return res.status(401).json({ error: 'invalid' });
+    req.session.user = username;
+    res.json({ ok: true });
+  });
 });
 
-app.post('/api/change-password', (req, res) => {
-  const { username, oldPass, newPass } = req.body;
+app.post('/api/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ ok: true });
+  });
+});
+
+app.get('/api/me', (req, res) => {
+  if (req.session.user) res.json({ username: req.session.user });
+  else res.status(401).json({ error: 'not logged in' });
+});
+
+app.post('/api/change-password', async (req, res) => {
+  const username = req.session.user;
+  const { oldPass, newPass } = req.body;
   if (!username || !oldPass || !newPass) {
     return res.status(400).json({ error: 'missing' });
   }
-  db.get(
-    'SELECT * FROM users WHERE username=? AND password=?',
-    [username, oldPass],
-    (err, row) => {
-      if (err || !row) return res.status(400).json({ error: 'invalid' });
-      db.run(
-        'UPDATE users SET password=? WHERE username=?',
-        [newPass, username],
-        function (err2) {
-          if (err2) return res.status(500).json({ error: err2.message });
-          res.json({ ok: true });
-        }
-      );
-    }
-  );
+  db.get('SELECT password FROM users WHERE username=?', [username], async (err, row) => {
+    if (err || !row) return res.status(400).json({ error: 'invalid' });
+    const match = await bcrypt.compare(oldPass, row.password);
+    if (!match) return res.status(400).json({ error: 'invalid' });
+    const hash = await bcrypt.hash(newPass, 10);
+    db.run('UPDATE users SET password=? WHERE username=?', [hash, username], function (err2) {
+      if (err2) return res.status(500).json({ error: err2.message });
+      res.json({ ok: true });
+    });
+  });
 });
 
 app.post('/api/history', (req, res) => {
-  const { username, query } = req.body;
+  const username = req.session.user || req.body.username;
+  const { query } = req.body;
   if (!username || !query) return res.status(400).json({ error: 'missing' });
   db.run(
     'INSERT INTO search_history (username, query) VALUES (?, ?)',
@@ -97,7 +118,7 @@ app.post('/api/history', (req, res) => {
 });
 
 app.get('/api/history', (req, res) => {
-  const username = req.query.username;
+  const username = req.session.user || req.query.username;
   db.all(
     'SELECT query, ts FROM search_history WHERE username=? ORDER BY ts DESC LIMIT 10',
     [username],
@@ -175,7 +196,8 @@ db.serialize(() => {
       const u = db.prepare(
         'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
       );
-      u.run('admin', 'admin', '', 'Administrator', '', '');
+      const hash = bcrypt.hashSync('admin', 10);
+      u.run('admin', hash, '', 'Administrator', '', '');
       u.finalize();
     }
   });

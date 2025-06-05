@@ -17,7 +17,7 @@ database.
 - Guest searches are kept only for the current session
 - Admin page allows adding, updating or removing products
 - Users can change their password after logging in
-- Default admin credentials are `admin`/`admin`
+- Default admin credentials are `admin`/`admin` (passwords are stored hashed and sessions use cookies)
 - Each result links to a dedicated detail page
 - Dedicated History page shows your recent searches
 - Modern CSS styles with the Roboto font for a cleaner look
@@ -30,6 +30,7 @@ database.
    visit `http://localhost:3000/login.html` and sign in with the default
    `admin`/`admin` credentials. Pages must be served through the running
    server; opening the HTML files directly will prevent login from working.
+   Your login state is kept using cookies.
 
 The server inserts several sample rows on first start so you can immediately
 experiment with the interface. The dummy rows reference placeholder PDFs stored
