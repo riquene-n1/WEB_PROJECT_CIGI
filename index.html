@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tsubakimoto Product Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Tsubakimoto Chain Search</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="admin.html">Admin</a>
+            <a href="history.html">History</a>
+            <a href="change_password.html">Change Password</a>
+            <a href="login.html">Login</a>
+            <a href="#" id="logoutLink">Logout</a>
+        </nav>
+    </header>
+    <section id="search-form">
+        <h2>Search Products</h2>
+        <form id="productForm">
+            <label for="productType">Product Type:</label>
+            <select id="productType" name="productType">
+                <option value="">All</option>
+                <option value="Roller Chain">Roller Chain</option>
+                <option value="Conveyor Chain">Conveyor Chain</option>
+                <option value="Small Conveyor Chain">Small Conveyor Chain</option>
+                <option value="Drive Chain">Drive Chain</option>
+            </select>
+            <label for="tolerance">Tolerance:</label>
+            <select id="tolerance" name="tolerance"></select>
+            <label for="modelNo">Model No:</label>
+            <select id="modelNo" name="modelNo"></select>
+            <label for="spec">Specification:</label>
+            <select id="spec" name="spec"></select>
+            <button type="submit">Search</button>
+        </form>
+    </section>
+    <section id="results">
+        <h2>Results</h2>
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Model No</th>
+                    <th>Type</th>
+                    <th>Specification</th>
+                    <th>Tolerance</th>
+                    <th>Catalog</th>
+                    <th>Image</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </section>
+    <section id="history">
+        <h2>Recent Searches</h2>
+        <ul id="historyList"></ul>
+    </section>
+    <script src="app.js"></script>
+</body>
+</html>

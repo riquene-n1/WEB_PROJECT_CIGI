@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Sign Up</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="history.html">History</a>
+        </nav>
+    </header>
+    <form id="signupForm">
+        <label for="suUsername">Username:</label>
+        <input type="text" id="suUsername" name="username" required>
+        <label for="suPassword">Password:</label>
+        <input type="password" id="suPassword" name="password" required>
+        <label for="suPhone">Phone:</label>
+        <input type="text" id="suPhone" name="phone" required>
+        <label for="suName">Name:</label>
+        <input type="text" id="suName" name="fullname" required>
+        <label for="suCompany">Company:</label>
+        <input type="text" id="suCompany" name="company" required>
+        <label for="suPos">Position:</label>
+        <input type="text" id="suPos" name="position" required>
+        <button type="submit">Register</button>
+    </form>
+    <script src="app.js"></script>
+</body>
+</html>
