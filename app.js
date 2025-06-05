@@ -4,20 +4,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
     const resultBody = document.querySelector('#resultTable tbody');
 
+
     async function fetchChains(query) {
         const params = new URLSearchParams(query || {}).toString();
         const res = await fetch('/api/chains' + (params ? `?${params}` : ''));
         return res.json();
     }
 
+    async function checkSession() {
+        try {
+            const res = await fetch('/api/me');
+            if (res.ok) {
+                const data = await res.json();
+                sessionStorage.setItem('loggedIn', 'true');
+                sessionStorage.setItem('username', data.username);
+            } else {
+                sessionStorage.removeItem('loggedIn');
+                sessionStorage.removeItem('username');
+            }
+        } catch {
+            sessionStorage.removeItem('loggedIn');
+            sessionStorage.removeItem('username');
+        }
+    }
+
+    async function populateFilters() {
+        const modelSel = document.getElementById('modelNo');
+        const specSel = document.getElementById('spec');
+        const tolSel = document.getElementById('tolerance');
+        if (!modelSel || !specSel || !tolSel) return;
+        const chains = await fetchChains();
+        const models = new Set();
+        const specs = new Set();
+        const tols = new Set();
+        chains.forEach(c => {
+            if (c.modelNo) models.add(c.modelNo);
+            if (c.spec) specs.add(c.spec);
+            if (c.tolerance) tols.add(c.tolerance);
+        });
+        modelSel.innerHTML = '<option value="">All</option>' +
+            Array.from(models).map(m => `<option value="${m}">${m}</option>`).join('');
+        specSel.innerHTML = '<option value="">All</option>' +
+            Array.from(specs).map(s => `<option value="${s}">${s}</option>`).join('');
+        tolSel.innerHTML = '<option value="">All</option>' +
+            Array.from(tols).map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
     async function loadHistory() {
         const list = document.getElementById('historyList');
         if (!list) return;
         list.innerHTML = '';
-        const username = sessionStorage.getItem('loggedIn') === 'true' ? sessionStorage.getItem('username') : null;
+        const loggedIn = sessionStorage.getItem('loggedIn') === 'true';
         let items = [];
-        if (username) {
-            const res = await fetch(`/api/history?username=${encodeURIComponent(username)}`);
+        if (loggedIn) {
+            const res = await fetch('/api/history');
             if (res.ok) items = await res.json();
         } else {
             items = JSON.parse(sessionStorage.getItem('tmpHistory') || '[]');
@@ -98,12 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultBody.appendChild(row);
             });
 
-            const username = sessionStorage.getItem('loggedIn') === 'true' ? sessionStorage.getItem('username') : null;
-            if (username) {
+            if (sessionStorage.getItem('loggedIn') === 'true') {
                 fetch('/api/history', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, query: queryObj })
+                    body: JSON.stringify({ query: queryObj })
                 }).then(loadHistory);
             } else {
                 const tmp = JSON.parse(sessionStorage.getItem('tmpHistory') || '[]');
@@ -126,8 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ username: user, password: pass })
             });
             if (res.ok) {
-                sessionStorage.setItem('loggedIn', 'true');
-                sessionStorage.setItem('username', user);
+                await checkSession();
                 if (user === 'admin') window.location.href = 'admin.html';
                 else window.location.href = 'index.html';
             } else {
@@ -169,8 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             logoutLink.style.display = 'none';
         }
-        logoutLink.addEventListener('click', (e) => {
+        logoutLink.addEventListener('click', async (e) => {
             e.preventDefault();
+            await fetch('/api/logout', { method: 'POST' });
             sessionStorage.removeItem('loggedIn');
             sessionStorage.removeItem('username');
             window.location.href = 'index.html';
@@ -232,12 +271,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const changeForm = document.getElementById('changeForm');
+    if (changeForm) {
+        changeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                oldPass: document.getElementById('oldPass').value,
+                newPass: document.getElementById('newPass').value
+            };
+            const res = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert('Password changed');
+                changeForm.reset();
+            } else {
+                alert('Change failed');
+            }
+        });
+    }
+
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', populateAdminTable);
     }
 
     populateAdminTable();
-    loadHistory();
+    checkSession().then(loadHistory);
     loadDetails();
+    populateFilters();
 });

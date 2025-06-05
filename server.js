@@ -1,9 +1,10 @@
-const chainDB = require('./database-chains');
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
 const parseCatalogPdf = require('./parsePdf');
 
 const app = express();
@@ -35,35 +36,76 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
+app.use(
+  session({
+    secret: 'tsubaki-secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 app.use(express.static(__dirname));
 
 // ----- User authentication -----
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { username, password, phone, fullname, company, position } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'missing data' });
-  const stmt = db.prepare(
-    'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
-  );
-  stmt.run(username, password, phone, fullname, company, position, function (err) {
-    if (err) return res.status(400).json({ error: 'user exists' });
-    res.json({ id: this.lastID });
-  });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const stmt = db.prepare(
+      'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    stmt.run(username, hash, phone, fullname, company, position, function (err) {
+      if (err) return res.status(400).json({ error: 'user exists' });
+      res.json({ id: this.lastID });
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  db.get(
-    'SELECT * FROM users WHERE username=? AND password=?',
-    [username, password],
-    (err, row) => {
-      if (err || !row) return res.status(401).json({ error: 'invalid' });
+  db.get('SELECT * FROM users WHERE username=?', [username], async (err, row) => {
+    if (err || !row) return res.status(401).json({ error: 'invalid' });
+    const match = await bcrypt.compare(password, row.password);
+    if (!match) return res.status(401).json({ error: 'invalid' });
+    req.session.user = username;
+    res.json({ ok: true });
+  });
+});
+
+app.post('/api/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ ok: true });
+  });
+});
+
+app.get('/api/me', (req, res) => {
+  if (req.session.user) res.json({ username: req.session.user });
+  else res.status(401).json({ error: 'not logged in' });
+});
+
+app.post('/api/change-password', async (req, res) => {
+  const username = req.session.user;
+  const { oldPass, newPass } = req.body;
+  if (!username || !oldPass || !newPass) {
+    return res.status(400).json({ error: 'missing' });
+  }
+  db.get('SELECT password FROM users WHERE username=?', [username], async (err, row) => {
+    if (err || !row) return res.status(400).json({ error: 'invalid' });
+    const match = await bcrypt.compare(oldPass, row.password);
+    if (!match) return res.status(400).json({ error: 'invalid' });
+    const hash = await bcrypt.hash(newPass, 10);
+    db.run('UPDATE users SET password=? WHERE username=?', [hash, username], function (err2) {
+      if (err2) return res.status(500).json({ error: err2.message });
       res.json({ ok: true });
-    }
-  );
+    });
+  });
 });
 
 app.post('/api/history', (req, res) => {
-  const { username, query } = req.body;
+  const username = req.session.user || req.body.username;
+  const { query } = req.body;
   if (!username || !query) return res.status(400).json({ error: 'missing' });
   db.run(
     'INSERT INTO search_history (username, query) VALUES (?, ?)',
@@ -76,7 +118,7 @@ app.post('/api/history', (req, res) => {
 });
 
 app.get('/api/history', (req, res) => {
-  const username = req.query.username;
+  const username = req.session.user || req.query.username;
   db.all(
     'SELECT query, ts FROM search_history WHERE username=? ORDER BY ts DESC LIMIT 10',
     [username],
@@ -154,7 +196,8 @@ db.serialize(() => {
       const u = db.prepare(
         'INSERT INTO users (username, password, phone, fullname, company, position) VALUES (?, ?, ?, ?, ?, ?)'
       );
-      u.run('admin', 'admin', '', 'Administrator', '', '');
+      const hash = bcrypt.hashSync('admin', 10);
+      u.run('admin', hash, '', 'Administrator', '', '');
       u.finalize();
     }
   });
@@ -285,81 +328,4 @@ app.delete('/api/chains/:id', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
-
-// ===== 체인 & 스프로켓 검색 관련 라우트 =====
-
-// Finder 페이지 라우트
-app.get('/finder', (req, res) => {
-    res.sendFile(path.join(__dirname, 'finder.html'));
-});
-
-// 체인 검색 API
-app.post('/api/chains/search', (req, res) => {
-    const filters = req.body;
-    
-    chainDB.searchChains(filters, (err, results) => {
-        if (err) {
-            console.error('체인 검색 오류:', err);
-            return res.status(500).json({ error: '검색 중 오류가 발생했습니다.' });
-        }
-        res.json(results);
-    });
-});
-
-// 스프로켓 검색 API
-app.post('/api/sprockets/search', (req, res) => {
-    const filters = req.body;
-    
-    chainDB.searchSprockets(filters, (err, results) => {
-        if (err) {
-            console.error('스프로켓 검색 오류:', err);
-            return res.status(500).json({ error: '검색 중 오류가 발생했습니다.' });
-        }
-        res.json(results);
-    });
-});
-
-// 체인 통계 API
-app.get('/api/stats/chains', (req, res) => {
-    chainDB.getChainStats((err, stats) => {
-        if (err) {
-            console.error('체인 통계 오류:', err);
-            return res.status(500).json({ error: '통계 조회 중 오류가 발생했습니다.' });
-        }
-        res.json(stats);
-    });
-});
-
-// 스프로켓 통계 API
-app.get('/api/stats/sprockets', (req, res) => {
-    chainDB.getSprocketStats((err, stats) => {
-        if (err) {
-            console.error('스프로켓 통계 오류:', err);
-            return res.status(500).json({ error: '통계 조회 중 오류가 발생했습니다.' });
-        }
-        res.json(stats);
-    });
-});
-
-// 모든 체인 목록 조회 (관리자용)
-app.get('/api/chains/all', (req, res) => {
-    chainDB.db.all("SELECT * FROM chains ORDER BY chain_size, strands", (err, rows) => {
-        if (err) {
-            console.error('체인 목록 조회 오류:', err);
-            return res.status(500).json({ error: '목록 조회 중 오류가 발생했습니다.' });
-        }
-        res.json(rows);
-    });
-});
-
-// 모든 스프로켓 목록 조회 (관리자용)
-app.get('/api/sprockets/all', (req, res) => {
-    chainDB.db.all("SELECT * FROM sprockets ORDER BY chain_size, teeth_count", (err, rows) => {
-        if (err) {
-            console.error('스프로켓 목록 조회 오류:', err);
-            return res.status(500).json({ error: '목록 조회 중 오류가 발생했습니다.' });
-        }
-        res.json(rows);
-    });
 });

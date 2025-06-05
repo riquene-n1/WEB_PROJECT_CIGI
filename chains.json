@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "modelNo": "RF2040",
+    "chainSize": "40",
+    "rows": "1",
+    "pinType": "",
+    "pitch": "1/2\"",
+    "tensileStrength": "",
+    "allowableLoad": "",
+    "weight": "",
+    "material": "",
+    "type": "Roller Chain",
+    "spec": "1/2 pitch",
+    "tolerance": "+0/-0.1",
+    "catalog": "catalog/sample.pdf",
+    "image": ""
+  },
+  {
+    "id": 2,
+    "modelNo": "BS25",
+    "chainSize": "25",
+    "rows": "1",
+    "pinType": "",
+    "pitch": "1",
+    "tensileStrength": "",
+    "allowableLoad": "",
+    "weight": "",
+    "material": "",
+    "type": "Conveyor Chain",
+    "spec": "1 pitch",
+    "tolerance": "+0/-0.2",
+    "catalog": "catalog/sample.pdf",
+    "image": ""
+  }
+]

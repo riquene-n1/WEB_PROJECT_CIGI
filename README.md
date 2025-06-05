@@ -1,3 +1,4 @@
+# WEB_PROJECT_CIGI
 # Tsubakimoto Chain Search UI
 
 Prototype web interface for managing Tsubakimoto chain catalog data. The
@@ -9,13 +10,15 @@ Uploaded files are stored under `catalog/` and `images/` and referenced from the
 database.
 
 ## Features
+- Crawler script builds a `chains.json` file so data can be loaded without a database
 - Basic pages: Home (search), Login/Sign‑up and Admin with a modern layout
-- Product search with filters for model, specification and tolerance
+- Product search with drop-down filters for model, specification and tolerance
 - Server API `/api/chains` supports query parameters for filtered search
 - Registered users can view their recent search history
 - Guest searches are kept only for the current session
 - Admin page allows adding, updating or removing products
-- Default admin credentials are `admin`/`admin`
+- Users can change their password after logging in
+- Default admin credentials are `admin`/`admin` (passwords are stored hashed and sessions use cookies)
 - Each result links to a dedicated detail page
 - Dedicated History page shows your recent searches
 - Modern CSS styles with the Roboto font for a cleaner look
@@ -28,6 +31,7 @@ database.
    visit `http://localhost:3000/login.html` and sign in with the default
    `admin`/`admin` credentials. Pages must be served through the running
    server; opening the HTML files directly will prevent login from working.
+   Your login state is kept using cookies.
 
 The server inserts several sample rows on first start so you can immediately
 experiment with the interface. The dummy rows reference placeholder PDFs stored
@@ -44,13 +48,17 @@ sample data. Use the **History** link to review your recent search queries.
 1. Place any existing catalog PDFs in the `catalog/` directory or upload them
    via the Admin page when creating a product entry. Uploaded files are scanned
    and the extracted details are used to populate new database rows.
-2. Optional: run `node crawler.js` to parse PDFs in bulk and insert entries into
-   the SQLite database.
+2. Run `node crawler.js` to download catalog PDFs and build `chains.json` containing the parsed fields.
 
 ### Exporting data
 Run `npm run export` to generate an `export.csv` file with the current chain
 entries. This CSV can then be imported into Oracle or other systems.
 
+### Changing your password
+After logging in, open `change_password.html` from the navigation bar. Submit
+your current and new password to update your account.
+
 ## Next Steps
 - Tune PDF parsing logic for better accuracy and support more catalog formats
 - Add validations and UI polish
+- Extend `crawler.js` to capture additional fields like chain size and material.
