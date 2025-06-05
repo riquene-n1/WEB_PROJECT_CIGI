@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Search History</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -11,20 +11,22 @@
 </head>
 <body>
     <header>
-        <h1>Login</h1>
+        <h1>Search History</h1>
         <nav>
             <a href="index.html">Home</a>
+            <a href="admin.html">Admin</a>
             <a href="history.html">History</a>
+            <a href="login.html">Login</a>
+            <a href="#" id="logoutLink">Logout</a>
         </nav>
     </header>
-    <form id="loginForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+    <section>
+        <h2>Recent Searches</h2>
+        <ul id="historyList"></ul>
+    </section>
     <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadHistory);
+    </script>
 </body>
 </html>

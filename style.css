@@ -1,26 +1,92 @@
+:root {
+    --primary: #2c3e50;
+    --accent: #1abc9c;
+    --bg: #f4f6f8;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
+    background: var(--bg);
+    color: #333;
     margin: 0;
     padding: 0;
 }
+
 header {
-    background-color: #333;
-    color: white;
-    padding: 1em;
+    background: var(--primary);
+    color: #fff;
+    padding: 1rem;
 }
+
+nav {
+    display: flex;
+    gap: 1rem;
+}
+
 nav a {
-    color: white;
-    margin-right: 1em;
+    color: #fff;
     text-decoration: none;
 }
-section {
-    margin: 2em;
+
+nav a:hover {
+    text-decoration: underline;
 }
+
+section {
+    margin: 2rem auto;
+    max-width: 900px;
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 1rem;
 }
-th, td {
+
+th {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+}
+
+tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
+form label {
+    display: block;
+    margin-top: 1rem;
+}
+
+form input,
+form select,
+form button {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
     border: 1px solid #ccc;
-    padding: 0.5em;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+form button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+form button:hover {
+    background: #17a88e;
 }

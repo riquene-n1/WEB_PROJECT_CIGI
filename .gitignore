@@ -1,3 +1,4 @@
 node_modules/
 tsubaki.db
 package-lock.json
+export.csv

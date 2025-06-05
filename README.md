@@ -9,17 +9,25 @@ Uploaded files are stored under `catalog/` and `images/` and referenced from the
 database.
 
 ## Features
-- Basic pages: Home (search), Login/Sign‑up and Admin
+- Basic pages: Home (search), Login/Sign‑up and Admin with a modern layout
 - Product search with filters for model, specification and tolerance
+- Server API `/api/chains` supports query parameters for filtered search
 - Registered users can view their recent search history
 - Guest searches are kept only for the current session
 - Admin page allows adding, updating or removing products
 - Default admin credentials are `admin`/`admin`
+- Each result links to a dedicated detail page
+- Dedicated History page shows your recent searches
+- Modern CSS styles with the Roboto font for a cleaner look
+- Pages include a logout link to clear the session
 
 ## Setup
 1. Install dependencies with `npm install`
 2. Start the server with `npm start`
-3. Open `http://localhost:3000/index.html` in a browser
+3. Open `http://localhost:3000/index.html` in a browser. Use the Login link to
+   visit `http://localhost:3000/login.html` and sign in with the default
+   `admin`/`admin` credentials. Pages must be served through the running
+   server; opening the HTML files directly will prevent login from working.
 
 The server inserts several sample rows on first start so you can immediately
 experiment with the interface. The dummy rows reference placeholder PDFs stored
@@ -30,7 +38,7 @@ entries.
 The included HTML pages and dummy rows are sufficient for a short demo or
 presentation. Start the server and open the Home page to search the preloaded
 entries. Log in as `admin`/`admin` to try the admin interface and modify the
-sample data.
+sample data. Use the **History** link to review your recent search queries.
 
 ### Adding catalog PDFs
 1. Place any existing catalog PDFs in the `catalog/` directory or upload them
@@ -38,6 +46,10 @@ sample data.
    and the extracted details are used to populate new database rows.
 2. Optional: run `node crawler.js` to parse PDFs in bulk and insert entries into
    the SQLite database.
+
+### Exporting data
+Run `npm run export` to generate an `export.csv` file with the current chain
+entries. This CSV can then be imported into Oracle or other systems.
 
 ## Next Steps
 - Tune PDF parsing logic for better accuracy and support more catalog formats

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Chain Details</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="admin.html">Admin</a>
+            <a href="history.html">History</a>
+            <a href="login.html">Login</a>
+            <a href="#" id="logoutLink">Logout</a>
+        </nav>
+    </header>
+    <section>
+        <table id="detailTable">
+            <tbody>
+                <tr><th>Model No</th><td id="dModel"></td></tr>
+                <tr><th>Type</th><td id="dType"></td></tr>
+                <tr><th>Specification</th><td id="dSpec"></td></tr>
+                <tr><th>Tolerance</th><td id="dTol"></td></tr>
+                <tr><th>Catalog</th><td id="dCatalog"></td></tr>
+                <tr><th>Image</th><td id="dImage"></td></tr>
+            </tbody>
+        </table>
+    </section>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadDetails);
+    </script>
+</body>
+</html>

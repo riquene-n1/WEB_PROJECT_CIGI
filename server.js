@@ -1,3 +1,4 @@
+const chainDB = require('./database-chains');
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -160,9 +161,36 @@ db.serialize(() => {
 });
 
 app.get('/api/chains', (req, res) => {
-  db.all('SELECT * FROM chains', [], (err, rows) => {
+  const { type, model, spec, tol } = req.query;
+  let sql = 'SELECT * FROM chains WHERE 1=1';
+  const params = [];
+  if (type) {
+    sql += ' AND LOWER(type) LIKE ?';
+    params.push('%' + type.toLowerCase() + '%');
+  }
+  if (model) {
+    sql += ' AND LOWER(modelNo) LIKE ?';
+    params.push('%' + model.toLowerCase() + '%');
+  }
+  if (spec) {
+    sql += ' AND LOWER(spec) LIKE ?';
+    params.push('%' + spec.toLowerCase() + '%');
+  }
+  if (tol) {
+    sql += ' AND LOWER(tolerance) LIKE ?';
+    params.push('%' + tol.toLowerCase() + '%');
+  }
+  db.all(sql, params, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
+  });
+});
+
+app.get('/api/chains/:id', (req, res) => {
+  const { id } = req.params;
+  db.get('SELECT * FROM chains WHERE id=?', [id], (err, row) => {
+    if (err || !row) return res.status(404).json({ error: 'Not found' });
+    res.json(row);
   });
 });
 
@@ -257,4 +285,81 @@ app.delete('/api/chains/:id', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// ===== 체인 & 스프로켓 검색 관련 라우트 =====
+
+// Finder 페이지 라우트
+app.get('/finder', (req, res) => {
+    res.sendFile(path.join(__dirname, 'finder.html'));
+});
+
+// 체인 검색 API
+app.post('/api/chains/search', (req, res) => {
+    const filters = req.body;
+    
+    chainDB.searchChains(filters, (err, results) => {
+        if (err) {
+            console.error('체인 검색 오류:', err);
+            return res.status(500).json({ error: '검색 중 오류가 발생했습니다.' });
+        }
+        res.json(results);
+    });
+});
+
+// 스프로켓 검색 API
+app.post('/api/sprockets/search', (req, res) => {
+    const filters = req.body;
+    
+    chainDB.searchSprockets(filters, (err, results) => {
+        if (err) {
+            console.error('스프로켓 검색 오류:', err);
+            return res.status(500).json({ error: '검색 중 오류가 발생했습니다.' });
+        }
+        res.json(results);
+    });
+});
+
+// 체인 통계 API
+app.get('/api/stats/chains', (req, res) => {
+    chainDB.getChainStats((err, stats) => {
+        if (err) {
+            console.error('체인 통계 오류:', err);
+            return res.status(500).json({ error: '통계 조회 중 오류가 발생했습니다.' });
+        }
+        res.json(stats);
+    });
+});
+
+// 스프로켓 통계 API
+app.get('/api/stats/sprockets', (req, res) => {
+    chainDB.getSprocketStats((err, stats) => {
+        if (err) {
+            console.error('스프로켓 통계 오류:', err);
+            return res.status(500).json({ error: '통계 조회 중 오류가 발생했습니다.' });
+        }
+        res.json(stats);
+    });
+});
+
+// 모든 체인 목록 조회 (관리자용)
+app.get('/api/chains/all', (req, res) => {
+    chainDB.db.all("SELECT * FROM chains ORDER BY chain_size, strands", (err, rows) => {
+        if (err) {
+            console.error('체인 목록 조회 오류:', err);
+            return res.status(500).json({ error: '목록 조회 중 오류가 발생했습니다.' });
+        }
+        res.json(rows);
+    });
+});
+
+// 모든 스프로켓 목록 조회 (관리자용)
+app.get('/api/sprockets/all', (req, res) => {
+    chainDB.db.all("SELECT * FROM sprockets ORDER BY chain_size, teeth_count", (err, rows) => {
+        if (err) {
+            console.error('스프로켓 목록 조회 오류:', err);
+            return res.status(500).json({ error: '목록 조회 중 오류가 발생했습니다.' });
+        }
+        res.json(rows);
+    });
 });

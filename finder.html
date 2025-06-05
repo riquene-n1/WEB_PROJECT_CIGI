@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tsubaki Chain & Sprocket Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #1e3c72;
+        }
+
+        .search-button {
+            grid-column: 1 / -1;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-count {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .model-number {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .card-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .spec-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .spec-value {
+            color: #333;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .home-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #1e3c72;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .home-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="home-link">← 메인 페이지로 돌아가기</a>
+        
+        <div class="header">
+            <h1>Tsubaki Chain & Sprocket Finder</h1>
+            <p>쯔바키 체인과 스프로켓을 쉽고 빠르게 검색하세요</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('chains')">체인 검색</button>
+            <button class="tab-button" onclick="showTab('sprockets')">스프로켓 검색</button>
+        </div>
+
+        <!-- 체인 검색 탭 -->
+        <div id="chains-tab" class="tab-content active">
+            <form id="chain-search-form" class="search-form">
+                <div class="form-group">
+                    <label for="chain-size">체인 사이즈</label>
+                    <select id="chain-size" name="chain_size">
+                        <option value="">전체</option>
+                        <option value="RS15">RS15</option>
+                        <option value="RS25">RS25</option>
+                        <option value="RS35">RS35</option>
+                        <option value="RS40">RS40</option>
+                        <option value="RS50">RS50</option>
+                        <option value="RS60">RS60</option>
+                        <option value="RS80">RS80</option>
+                        <option value="RS100">RS100</option>
+                        <option value="RS120">RS120</option>
+                        <option value="RS140">RS140</option>
+                        <option value="RS160">RS160</option>
+                        <option value="RS180">RS180</option>
+                        <option value="RS200">RS200</option>
+                        <option value="RS240">RS240</option>
+                        <option value="RS06B">RS06B</option>
+                        <option value="RS08B">RS08B</option>
+                        <option value="RS10B">RS10B</option>
+                        <option value="RS12B">RS12B</option>
+                        <option value="RS16B">RS16B</option>
+                        <option value="RS20B">RS20B</option>
+                        <option value="RS24B">RS24B</option>
+                        <option value="RS28B">RS28B</option>
+                        <option value="RS32B">RS32B</option>
+                        <option value="RS40B">RS40B</option>
+                        <option value="RS48B">RS48B</option>
+                        <option value="RS56B">RS56B</option>
+                        <option value="RF320">RF320</option>
+                        <option value="RF400">RF400</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="chain-series">시리즈</label>
+                    <select id="chain-series" name="series">
+                        <option value="">전체</option>
+                        <option value="RS">RS</option>
+                        <option value="RF">RF</option>
+                        <option value="BS/DIN">BS/DIN</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="chain-strands">열수</label>
+                    <select id="chain-strands" name="strands">
+                        <option value="">전체</option>
+                        <option value="1">1열</option>
+                        <option value="2">2열</option>
+                        <option value="3">3열</option>
+                        <option value="4">4열</option>
+                        <option value="5">5열</option>
+                        <option value="6">6열</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="chain-pin-type">핀 형식</label>
+                    <select id="chain-pin-type" name="pin_type">
+                        <option value="">전체</option>
+                        <option value="RP">RP (리벳 핀)</option>
+                        <option value="CP">CP (코터 핀)</option>
+                        <option value="FTJ">FTJ (F형 T핀)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="chain-material">재질</label>
+                    <select id="chain-material" name="material">
+                        <option value="">전체</option>
+                        <option value="Steel">스틸</option>
+                        <option value="Stainless">스테인리스</option>
+                        <option value="Plastic">엔지니어링 플라스틱</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="search-button">체인 검색</button>
+            </form>
+
+            <div id="chain-results" class="results-section"></div>
+        </div>
+
+        <!-- 스프로켓 검색 탭 -->
+        <div id="sprockets-tab" class="tab-content">
+            <form id="sprocket-search-form" class="search-form">
+                <div class="form-group">
+                    <label for="sprocket-chain-size">체인 사이즈</label>
+                    <select id="sprocket-chain-size" name="chain_size">
+                        <option value="">전체</option>
+                        <option value="RS15">RS15</option>
+                        <option value="RS25">RS25</option>
+                        <option value="RS35">RS35</option>
+                        <option value="RS40">RS40</option>
+                        <option value="RS50">RS50</option>
+                        <option value="RS60">RS60</option>
+                        <option value="RS80">RS80</option>
+                        <option value="RS100">RS100</option>
+                        <option value="RS120">RS120</option>
+                        <option value="RS140">RS140</option>
+                        <option value="RS160">RS160</option>
+                        <option value="RS180">RS180</option>
+                        <option value="RS200">RS200</option>
+                        <option value="RS240">RS240</option>
+                        <option value="RS06B">RS06B</option>
+                        <option value="RS08B">RS08B</option>
+                        <option value="RS10B">RS10B</option>
+                        <option value="RS12B">RS12B</option>
+                        <option value="RS16B">RS16B</option>
+                        <option value="RS20B">RS20B</option>
+                        <option value="RS24B">RS24B</option>
+                        <option value="RS28B">RS28B</option>
+                        <option value="RS32B">RS32B</option>
+                        <option value="RS40B">RS40B</option>
+                        <option value="RS48B">RS48B</option>
+                        <option value="RS56B">RS56B</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sprocket-teeth-min">최소 톱니 수</label>
+                    <input type="number" id="sprocket-teeth-min" name="teeth_min" min="9" max="75" placeholder="예: 9">
+                </div>
+
+                <div class="form-group">
+                    <label for="sprocket-teeth-max">최대 톱니 수</label>
+                    <input type="number" id="sprocket-teeth-max" name="teeth_max" min="9" max="75" placeholder="예: 75">
+                </div>
+
+                <div class="form-group">
+                    <label for="sprocket-hub-type">허브 형식</label>
+                    <select id="sprocket-hub-type" name="hub_type">
+                        <option value="">전체</option>
+                        <option value="1A">1A형 (평판형)</option>
+                        <option value="1B">1B형 (한쪽 허브형)</option>
+                        <option value="1C">1C형 (양쪽 허브형)</option>
+                        <option value="2B">2B형 (두열 한쪽 허브형)</option>
+                        <option value="2C">2C형 (두열 양쪽 허브형)</option>
+                        <option value="SD">SD형 (싱글 듀얼형)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sprocket-bore-type">축홀 사양</label>
+                    <select id="sprocket-bore-type" name="bore_type">
+                        <option value="">전체</option>
+                        <option value="Pilot">파일럿 보어</option>
+                        <option value="Fit">Fit Bore</option>
+                        <option value="Lock">록 스프로켓</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sprocket-material">재질</label>
+                    <select id="sprocket-material" name="material">
+                        <option value="">전체</option>
+                        <option value="Steel">스틸</option>
+                        <option value="Stainless">스테인리스</option>
+                        <option value="Plastic">엔지니어링 플라스틱</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="search-button">스프로켓 검색</button>
+            </form>
+
+            <div id="sprocket-results" class="results-section"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'chains';
+
+        function showTab(tabName) {
+            // 탭 버튼 업데이트
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 탭 콘텐츠 업데이트
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            currentTab = tabName;
+        }
+
+        // 체인 검색
+        document.getElementById('chain-search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const filters = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (value) filters[key] = value;
+            }
+
+            showLoading('chain-results');
+
+            try {
+                const response = await fetch('/api/chains/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(filters)
+                });
+
+                const results = await response.json();
+                displayChainResults(results);
+            } catch (error) {
+                showError('chain-results', '검색 중 오류가 발생했습니다.');
+            }
+        });
+
+        // 스프로켓 검색
+        document.getElementById('sprocket-search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const filters = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (value) filters[key] = value;
+            }
+
+            showLoading('sprocket-results');
+
+            try {
+                const response = await fetch('/api/sprockets/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(filters)
+                });
+
+                const results = await response.json();
+                displaySprocketResults(results);
+            } catch (error) {
+                showError('sprocket-results', '검색 중 오류가 발생했습니다.');
+            }
+        });
+
+        function showLoading(containerId) {
+            document.getElementById(containerId).innerHTML = `
+                <div class="loading">
+                    <p>검색 중...</p>
+                </div>
+            `;
+        }
+
+        function showError(containerId, message) {
+            document.getElementById(containerId).innerHTML = `
+                <div class="no-results">
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function displayChainResults(results) {
+            const container = document.getElementById('chain-results');
+            
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <p>검색 조건에 맞는 체인을 찾을 수 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const header = `
+                <div class="results-header">
+                    <div class="results-count">${results.length}개의 체인을 찾았습니다</div>
+                </div>
+            `;
+
+            const cards = results.map(chain => `
+                <div class="result-card">
+                    <div class="card-header">
+                        <div class="model-number">${chain.model_number}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="spec-item">
+                            <span class="spec-label">체인 사이즈:</span>
+                            <span class="spec-value">${chain.chain_size}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">시리즈:</span>
+                            <span class="spec-value">${chain.series}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">열수:</span>
+                            <span class="spec-value">${chain.strands}열</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">핀 형식:</span>
+                            <span class="spec-value">${chain.pin_type}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">피치:</span>
+                            <span class="spec-value">${chain.pitch || 'N/A'}mm</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">인장강도:</span>
+                            <span class="spec-value">${chain.tensile_strength || 'N/A'}kN</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">허용하중:</span>
+                            <span class="spec-value">${chain.allowable_load || 'N/A'}kN</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">중량:</span>
+                            <span class="spec-value">${chain.weight || 'N/A'}kg/m</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">재질:</span>
+                            <span class="spec-value">${chain.material}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = header + `<div class="results-grid">${cards}</div>`;
+        }
+
+        function displaySprocketResults(results) {
+            const container = document.getElementById('sprocket-results');
+            
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <p>검색 조건에 맞는 스프로켓을 찾을 수 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const header = `
+                <div class="results-header">
+                    <div class="results-count">${results.length}개의 스프로켓을 찾았습니다</div>
+                </div>
+            `;
+
+            const cards = results.map(sprocket => `
+                <div class="result-card">
+                    <div class="card-header">
+                        <div class="model-number">${sprocket.model_number}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="spec-item">
+                            <span class="spec-label">체인 사이즈:</span>
+                            <span class="spec-value">${sprocket.chain_size}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">톱니 수:</span>
+                            <span class="spec-value">${sprocket.teeth_count}T</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">허브 형식:</span>
+                            <span class="spec-value">${sprocket.hub_type}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">축홀 사양:</span>
+                            <span class="spec-value">${sprocket.bore_type}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">파일럿 보어:</span>
+                            <span class="spec-value">${sprocket.pilot_bore || 'N/A'}mm</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">최대 보어:</span>
+                            <span class="spec-value">${sprocket.max_bore || 'N/A'}mm</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">외경:</span>
+                            <span class="spec-value">${sprocket.outer_diameter || 'N/A'}mm</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">중량:</span>
+                            <span class="spec-value">${sprocket.weight || 'N/A'}kg</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">재질:</span>
+                            <span class="spec-value">${sprocket.material}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">톱니 경화:</span>
+                            <span class="spec-value">${sprocket.tooth_hardening ? '있음' : '없음'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = header + `<div class="results-grid">${cards}</div>`;
+        }
+    </script>
+</body>
+</html>

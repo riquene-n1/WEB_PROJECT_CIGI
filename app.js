@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
     const resultBody = document.querySelector('#resultTable tbody');
 
-    async function fetchChains() {
-        const res = await fetch('/api/chains');
+    async function fetchChains(query) {
+        const params = new URLSearchParams(query || {}).toString();
+        const res = await fetch('/api/chains' + (params ? `?${params}` : ''));
         return res.json();
     }
 
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         items.forEach(it => {
             const li = document.createElement('li');
-            const q = it.query || it.query;
+            const q = it.query;
             li.textContent = `${q.type || ''} ${q.model || ''} ${q.spec || ''} ${q.tol || ''}`.trim();
             list.appendChild(li);
         });
@@ -47,6 +48,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    async function loadDetails() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const table = document.getElementById('detailTable');
+        if (!id || !table) return;
+        const res = await fetch(`/api/chains/${id}`);
+        if (!res.ok) {
+            table.querySelector('tbody').innerHTML = '<tr><td colspan="2">Not found</td></tr>';
+            return;
+        }
+        const item = await res.json();
+        document.getElementById('dModel').textContent = item.modelNo;
+        document.getElementById('dType').textContent = item.type;
+        document.getElementById('dSpec').textContent = item.spec;
+        document.getElementById('dTol').textContent = item.tolerance;
+        document.getElementById('dCatalog').innerHTML = `<a href="${item.catalog}">View</a>`;
+        document.getElementById('dImage').innerHTML = item.image ? `<img src="${item.image}" width="100">` : '';
+    }
+
     if (productForm && resultBody) {
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -63,27 +83,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 spec: specVal,
                 tol: tolVal
             };
-            const chains = await fetchChains();
-            chains
-                .filter(item => {
-                    const matchType = typeVal ? item.type.toLowerCase().includes(typeVal) : true;
-                    const matchModel = modelVal ? item.modelNo.toLowerCase().includes(modelVal) : true;
-                    const matchSpec = specVal ? item.spec.toLowerCase().includes(specVal) : true;
-                    const matchTol = tolVal ? item.tolerance.toLowerCase().includes(tolVal) : true;
-                    return matchType && matchModel && matchSpec && matchTol;
-                })
-                .forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
+            const chains = await fetchChains(queryObj);
+            chains.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
                         <td>${item.modelNo}</td>
                         <td>${item.type}</td>
                         <td>${item.spec}</td>
                         <td>${item.tolerance}</td>
-                        <td><a href="${item.catalog}">View</a></td>
-                        <td><img src="${item.image}" alt="${item.modelNo}" width="50"></td>
+                <td><a href="${item.catalog}">View</a></td>
+                <td>${item.image ? `<img src="${item.image}" alt="${item.modelNo}" width="50">` : ''}</td>
+                <td><a href="detail.html?id=${item.id}">Details</a></td>
                     `;
-                    resultBody.appendChild(row);
-                });
+                resultBody.appendChild(row);
+            });
 
             const username = sessionStorage.getItem('loggedIn') === 'true' ? sessionStorage.getItem('username') : null;
             if (username) {
@@ -149,6 +162,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const logoutLink = document.getElementById('logoutLink');
+    if (logoutLink) {
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            logoutLink.style.display = 'inline';
+        } else {
+            logoutLink.style.display = 'none';
+        }
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem('loggedIn');
+            sessionStorage.removeItem('username');
+            window.location.href = 'index.html';
+        });
+    }
+
     const addForm = document.getElementById('addForm');
     if (addForm) {
         addForm.addEventListener('submit', async (e) => {
@@ -211,4 +239,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     populateAdminTable();
     loadHistory();
+    loadDetails();
 });
