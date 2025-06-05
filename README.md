@@ -61,3 +61,7 @@ your current and new password to update your account.
 - Tune PDF parsing logic for better accuracy and support more catalog formats
 - Add validations and UI polish
 - Extend `crawler.js` to capture additional fields like chain size and material.
+
+## Java Board Project Skeleton
+A new `Board-WEB` directory contains a placeholder Java/JSP project structure based on a typical Eclipse dynamic web project. Source files under `src/java` are stubs for controllers, DAOs, and utilities. JSP pages under `webapp` provide basic placeholders.
+
