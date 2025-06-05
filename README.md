@@ -10,11 +10,12 @@ database.
 
 ## Features
 - Basic pages: Home (search), Login/Sign‑up and Admin with a modern layout
-- Product search with filters for model, specification and tolerance
+- Product search with drop-down filters for model, specification and tolerance
 - Server API `/api/chains` supports query parameters for filtered search
 - Registered users can view their recent search history
 - Guest searches are kept only for the current session
 - Admin page allows adding, updating or removing products
+- Users can change their password after logging in
 - Default admin credentials are `admin`/`admin`
 - Each result links to a dedicated detail page
 - Dedicated History page shows your recent searches
@@ -50,6 +51,10 @@ sample data. Use the **History** link to review your recent search queries.
 ### Exporting data
 Run `npm run export` to generate an `export.csv` file with the current chain
 entries. This CSV can then be imported into Oracle or other systems.
+
+### Changing your password
+After logging in, open `change_password.html` from the navigation bar. Submit
+your current and new password to update your account.
 
 ## Next Steps
 - Tune PDF parsing logic for better accuracy and support more catalog formats

@@ -10,6 +10,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return res.json();
     }
 
+    async function populateFilters() {
+        const modelSel = document.getElementById('modelNo');
+        const specSel = document.getElementById('spec');
+        const tolSel = document.getElementById('tolerance');
+        if (!modelSel || !specSel || !tolSel) return;
+        const chains = await fetchChains();
+        const models = new Set();
+        const specs = new Set();
+        const tols = new Set();
+        chains.forEach(c => {
+            if (c.modelNo) models.add(c.modelNo);
+            if (c.spec) specs.add(c.spec);
+            if (c.tolerance) tols.add(c.tolerance);
+        });
+        modelSel.innerHTML = '<option value="">All</option>' +
+            Array.from(models).map(m => `<option value="${m}">${m}</option>`).join('');
+        specSel.innerHTML = '<option value="">All</option>' +
+            Array.from(specs).map(s => `<option value="${s}">${s}</option>`).join('');
+        tolSel.innerHTML = '<option value="">All</option>' +
+            Array.from(tols).map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
     async function loadHistory() {
         const list = document.getElementById('historyList');
         if (!list) return;
@@ -232,6 +254,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const changeForm = document.getElementById('changeForm');
+    if (changeForm) {
+        changeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                username: sessionStorage.getItem('username'),
+                oldPass: document.getElementById('oldPass').value,
+                newPass: document.getElementById('newPass').value
+            };
+            const res = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert('Password changed');
+                changeForm.reset();
+            } else {
+                alert('Change failed');
+            }
+        });
+    }
+
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', populateAdminTable);
@@ -240,4 +285,5 @@ document.addEventListener('DOMContentLoaded', () => {
     populateAdminTable();
     loadHistory();
     loadDetails();
+    populateFilters();
 });

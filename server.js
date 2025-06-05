@@ -61,6 +61,28 @@ app.post('/api/login', (req, res) => {
   );
 });
 
+app.post('/api/change-password', (req, res) => {
+  const { username, oldPass, newPass } = req.body;
+  if (!username || !oldPass || !newPass) {
+    return res.status(400).json({ error: 'missing' });
+  }
+  db.get(
+    'SELECT * FROM users WHERE username=? AND password=?',
+    [username, oldPass],
+    (err, row) => {
+      if (err || !row) return res.status(400).json({ error: 'invalid' });
+      db.run(
+        'UPDATE users SET password=? WHERE username=?',
+        [newPass, username],
+        function (err2) {
+          if (err2) return res.status(500).json({ error: err2.message });
+          res.json({ ok: true });
+        }
+      );
+    }
+  );
+});
+
 app.post('/api/history', (req, res) => {
   const { username, query } = req.body;
   if (!username || !query) return res.status(400).json({ error: 'missing' });

@@ -15,6 +15,7 @@
         <nav>
             <a href="index.html">Home</a>
             <a href="history.html">History</a>
+            <a href="change_password.html">Change Password</a>
             <a href="login.html">Login</a>
             <a href="#" id="logoutLink">Logout</a>
         </nav>
@@ -25,7 +26,12 @@
             <label for="newModelNo">Model No:</label>
             <input type="text" id="newModelNo" name="modelNo" required>
             <label for="newType">Type:</label>
-            <input type="text" id="newType" name="type" required>
+            <select id="newType" name="type" required>
+                <option value="Roller Chain">Roller Chain</option>
+                <option value="Conveyor Chain">Conveyor Chain</option>
+                <option value="Small Conveyor Chain">Small Conveyor Chain</option>
+                <option value="Drive Chain">Drive Chain</option>
+            </select>
             <label for="newSpec">Specification:</label>
             <input type="text" id="newSpec" name="spec" required>
             <label for="newTol">Tolerance:</label>
@@ -53,7 +59,12 @@
             <label for="updateModel">Model No:</label>
             <input type="text" id="updateModel" name="modelNo" required>
             <label for="updateType">Type:</label>
-            <input type="text" id="updateType" name="type" required>
+            <select id="updateType" name="type" required>
+                <option value="Roller Chain">Roller Chain</option>
+                <option value="Conveyor Chain">Conveyor Chain</option>
+                <option value="Small Conveyor Chain">Small Conveyor Chain</option>
+                <option value="Drive Chain">Drive Chain</option>
+            </select>
             <label for="updateSpec">Specification:</label>
             <input type="text" id="updateSpec" name="spec" required>
             <label for="updateTol">Tolerance:</label>

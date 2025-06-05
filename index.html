@@ -16,6 +16,7 @@
             <a href="index.html">Home</a>
             <a href="admin.html">Admin</a>
             <a href="history.html">History</a>
+            <a href="change_password.html">Change Password</a>
             <a href="login.html">Login</a>
             <a href="#" id="logoutLink">Logout</a>
         </nav>
@@ -25,15 +26,18 @@
         <form id="productForm">
             <label for="productType">Product Type:</label>
             <select id="productType" name="productType">
-                <option value="roller">Roller Chain</option>
-                <option value="conveyor">Conveyor Chain</option>
+                <option value="">All</option>
+                <option value="Roller Chain">Roller Chain</option>
+                <option value="Conveyor Chain">Conveyor Chain</option>
+                <option value="Small Conveyor Chain">Small Conveyor Chain</option>
+                <option value="Drive Chain">Drive Chain</option>
             </select>
             <label for="tolerance">Tolerance:</label>
-            <input type="text" id="tolerance" name="tolerance" placeholder="e.g., +0/-0.1">
+            <select id="tolerance" name="tolerance"></select>
             <label for="modelNo">Model No:</label>
-            <input type="text" id="modelNo" name="modelNo" placeholder="e.g., RF2040">
+            <select id="modelNo" name="modelNo"></select>
             <label for="spec">Specification:</label>
-            <input type="text" id="spec" name="spec" placeholder="e.g., 1/2 pitch">
+            <select id="spec" name="spec"></select>
             <button type="submit">Search</button>
         </form>
     </section>
